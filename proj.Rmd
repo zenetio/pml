@@ -1,0 +1,62 @@
+Machine Learning Project
+========================================================
+
+install.packages("knitr")
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring web pages (click the **Help** toolbar button for more details on using R Markdown).
+
+When you click the **Knit HTML** button a web page will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+load data
+
+```{r}
+raw_training = read.csv("D:\\Dropbox\\Course-Pratical Machine Learning\\Project\\pml-training.csv")
+raw_testing = read.csv("D:\\Dropbox\\Course-Pratical Machine Learning\\Project\\pml-testing.csv")
+library(caret)
+training=raw_training[,-1]
+testing=raw_testing[,-1]
+```
+Remove invalid values
+```{r}
+row.nas = apply(training,1,function(x) {sum(is.na(x))})
+val_training = training[which(row.nas==0),]
+row.tnas = apply(testing,1,function(x) {sum(is.na(x))})
+val_testing = testing[which(row.tnas==0),]
+```
+Using 35 predictors
+
+```{r}
+val_training = val_training[,c("roll_belt","pitch_belt","max_roll_belt","max_picth_belt","max_yaw_belt","min_roll_belt","min_pitch_belt","amplitude_yaw_belt","var_total_accel_belt","avg_roll_belt","var_roll_belt","avg_pitch_belt","var_pitch_belt","avg_yaw_belt","var_yaw_belt","roll_arm","pitch_arm","yaw_arm","total_accel_arm","var_accel_arm","avg_roll_arm","var_roll_arm","avg_pitch_arm","max_roll_arm","max_picth_arm","min_roll_arm","min_pitch_arm","amplitude_roll_arm","amplitude_pitch_arm","amplitude_yaw_arm","max_roll_dumbbell","max_picth_dumbbell","min_roll_dumbbell","min_pitch_dumbbell","var_accel_dumbbell","classe")]
+val_testing = val_testing[,c("roll_belt","pitch_belt","max_roll_belt","max_picth_belt","max_yaw_belt","min_roll_belt","min_pitch_belt","amplitude_yaw_belt","var_total_accel_belt","avg_roll_belt","var_roll_belt","avg_pitch_belt","var_pitch_belt","avg_yaw_belt","var_yaw_belt","roll_arm","pitch_arm","yaw_arm","total_accel_arm","var_accel_arm","avg_roll_arm","var_roll_arm","avg_pitch_arm","max_roll_arm","max_picth_arm","min_roll_arm","min_pitch_arm","amplitude_roll_arm","amplitude_pitch_arm","amplitude_yaw_arm","max_roll_dumbbell","max_picth_dumbbell","min_roll_dumbbell","min_pitch_dumbbell","var_accel_dumbbell","classe")]
+```
+Try fit the model using regression trees
+
+```{r}
+modFit = train(val_training$classe ~.,data=val_training, method="rpart")
+modFit
+modFit$finalModel
+```
+Accuracy of 52%
+
+Lets try random forest model
+
+```{r}
+modFit_r = train(val_training$classe ~.,data=val_training, method="rf",prox=T)
+modFit_r
+modFit_r$finalModel
+```
+Now we get 73% of accuracy
+Get the prediction
+
+```{r}
+predictions=predict(modFit,newdata=val_testing)
+predictions
+confusionMatrix(predictions,val_testing$classe)
+```
+
+
+
+
+```{r fig.width=7, fig.height=6}
+plot(cars)
+```
+
